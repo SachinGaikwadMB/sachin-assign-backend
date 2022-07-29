@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mb.api.business.service.CheckoutService;
 import com.mb.api.web.dto.PaymentInfoDto;
 import com.stripe.exception.StripeException;
-import com.stripe.model.PaymentIntent;
 
 @RestController
 @RequestMapping("/api")
@@ -37,8 +36,7 @@ public class CheckoutController
 	@PostMapping("/checkout/payment-intent")
 	public ResponseEntity<String> createPaymentIntent(@RequestBody PaymentInfoDto paymentInfoDto) throws StripeException
 	{
-		PaymentIntent paymentIntent = checkoutService.createPaymentIntent(paymentInfoDto);
-		String paymentStr = paymentIntent.toJson();
+		String  paymentStr = checkoutService.createPaymentIntent(paymentInfoDto);
 		return new ResponseEntity<>(paymentStr, HttpStatus.OK);
 	}
 
