@@ -30,18 +30,21 @@ public class CheckoutServiceImpl implements CheckoutService
 				// We will use the credit card payment method
 				.addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
 				.setMode(SessionCreateParams.Mode.PAYMENT).setSuccessUrl(paymentInfoDto.getSuccessUrl())
-				.setCancelUrl(
-						paymentInfoDto.getCancelUrl())
+				.setCancelUrl(paymentInfoDto.getCancelUrl())
 				.addLineItem(
-						SessionCreateParams.LineItem.builder().setQuantity(paymentInfoDto.getQuantity())
-								.setPriceData(
-										SessionCreateParams
-										.LineItem.PriceData.builder()
-												.setCurrency(paymentInfoDto.getCurrency())
-												.setUnitAmount(paymentInfoDto.getAmount())
-												.setProductData(SessionCreateParams.LineItem.PriceData.ProductData
-												.builder().setName(paymentInfoDto.getName()).build())
-												.build())
+						SessionCreateParams.LineItem.builder()
+								.setQuantity(paymentInfoDto.getQuantity())
+								.setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+										.setCurrency(paymentInfoDto.getCurrency())
+										.setUnitAmount(paymentInfoDto.getAmount())
+		
+										.setProductData(
+												SessionCreateParams.LineItem.PriceData.ProductData
+														.builder()
+														.setName(paymentInfoDto.getName())
+														.addImage("https://m.media-amazon.com/images/I/71fkE5LBc+L._SX569_.jpg")
+														.build())
+										.build())
 								.build())
 				.build();
 		// create a stripe session

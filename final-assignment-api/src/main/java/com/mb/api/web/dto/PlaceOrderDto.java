@@ -1,14 +1,17 @@
 package com.mb.api.web.dto;
 
 import java.util.Set;
+import javax.validation.constraints.NotBlank;
 import com.mb.api.persistance.entity.Image;
 
 public class PlaceOrderDto
 {
+	@NotBlank
 	private String name;
 	
 	private Double unitPrice;
 	
+	@NotBlank
 	private String description;
 	
 	private Set<Image> image;

@@ -2,6 +2,7 @@ package com.mb.api.web.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class CheckoutController
 	}
 	
 	@PostMapping("/checkout/payment-intent")
-	public ResponseEntity<String> createPaymentIntent(@RequestBody PaymentInfoDto paymentInfoDto) throws StripeException
+	public ResponseEntity<String> createPaymentIntent(@Valid @RequestBody PaymentInfoDto paymentInfoDto) throws StripeException
 	{
 		String  paymentStr = checkoutService.createPaymentIntent(paymentInfoDto);
 		return new ResponseEntity<>(paymentStr, HttpStatus.OK);
