@@ -2,17 +2,30 @@ package com.mb.api.business.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
+import com.mb.api.persistance.entity.SuccessPaymentData;
+import com.mb.api.persistance.repository.SuccessPaymentRepository;
 import com.mb.api.web.dto.PaymentInfoDto;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 
 @Service
 public class CheckoutServiceImpl implements CheckoutService
 {
+	@Autowired
+	private SuccessPaymentRepository successPaymentRepository;
+
 	private static Gson gson = new Gson();
 
 	public static void init()
@@ -37,7 +50,7 @@ public class CheckoutServiceImpl implements CheckoutService
 								.setPriceData(SessionCreateParams.LineItem.PriceData.builder()
 										.setCurrency(paymentInfoDto.getCurrency())
 										.setUnitAmount(paymentInfoDto.getAmount())
-		
+
 										.setProductData(
 												SessionCreateParams.LineItem.PriceData.ProductData
 														.builder()
@@ -54,6 +67,42 @@ public class CheckoutServiceImpl implements CheckoutService
 		responseData.put("id", session.getId());
 		// We can return only the sessionId as a String
 		return gson.toJson(responseData);
+	}
+
+	@Override
+	public String handleStripePaymentDetails(HttpServletRequest request)
+	{
+		String sigHeader = request.getHeader("Stripe-Signature");
+		Event event = null;
+		try
+		{
+			String payload = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+			event = Webhook.constructEvent(payload, sigHeader, "whsec_b05b27140b30474fc22fe68e97022352e024095331103476b1bc4105445f61ca");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		if ("charge.succeeded".equals(event.getType()))
+		{
+			SuccessPaymentData successDetails = new SuccessPaymentData();
+
+			EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
+			StripeObject stripeObject = null;
+			if (dataObjectDeserializer.getObject().isPresent())
+			{
+				stripeObject = dataObjectDeserializer.getObject().get();
+			}
+			Charge charge = (Charge) stripeObject;
+
+			successDetails.setEmail(charge.getBillingDetails().getEmail());
+			successDetails.setName(charge.getBillingDetails().getName());
+			successDetails.setAmount(charge.getAmount() / 100);
+			successDetails.setTransctionId(charge.getBalanceTransaction());
+
+			successPaymentRepository.save(successDetails);
+		}
+		return "Your Order Placed Successfully !";
 	}
 
 }

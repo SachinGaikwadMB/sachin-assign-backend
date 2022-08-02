@@ -4,6 +4,8 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mb.api.business.exception.CustomException;
+import com.mb.api.constant.ErrorCode;
 import com.mb.api.persistance.entity.Product;
 import com.mb.api.persistance.repository.ProductRepository;
 import com.mb.api.web.dto.PlaceOrderDto;
@@ -24,7 +26,7 @@ public class ProductServiceImpl implements ProductService
 		try {
 		productRepository.save(product);
 		}catch (Exception ex) {
-			//TODO: Handle exception
+			throw new CustomException("Unable Save Data !", ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 		return "Your Order placed successfully !";
 	}
@@ -39,7 +41,7 @@ public class ProductServiceImpl implements ProductService
 		}
 		catch (Exception e)
 		{
-			throw new  RuntimeException("Unable to fetch data, Please try again later.");
+			throw new CustomException("Unable fetched Data !", ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 		
 

@@ -1,13 +1,11 @@
 package com.mb.api.web.controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,22 +21,18 @@ public class CheckoutController
 {
 	@Autowired
 	private CheckoutService checkoutService;
-	
-	@GetMapping("/test")
-	public List<String> test() {
-		List<String> list = new ArrayList<>();
-		list.add("sachin");
-		list.add("aman");
-		list.add("amaresh");
-		
-		return list;
-	}
-	
+
 	@PostMapping("/checkout/payment-intent")
 	public ResponseEntity<String> createPaymentIntent(@Valid @RequestBody PaymentInfoDto paymentInfoDto) throws StripeException
 	{
-		String  paymentStr = checkoutService.createPaymentIntent(paymentInfoDto);
+		String paymentStr = checkoutService.createPaymentIntent(paymentInfoDto);
 		return new ResponseEntity<>(paymentStr, HttpStatus.OK);
 	}
 
+	@PostMapping("/webhook")
+	public ResponseEntity<String> handleStripePaymentDetails(HttpServletRequest request)
+	{
+		String responseMsg = checkoutService.handleStripePaymentDetails(request);
+		return new ResponseEntity<>(responseMsg, HttpStatus.OK);
+	}
 }
